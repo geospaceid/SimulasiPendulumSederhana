@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulator Pendulum Sederhana - Media Ajar Fisika</title>
+  <style>
+    /* ============================================
+       CSS STYLES
+       ============================================ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #e0e0e0;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00d4ff;
+      margin-bottom: 8px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+
+    /* Swing Area */
+    .swing-area {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .swing-box {
+      text-align: center;
+    }
+
+    .swing-box canvas {
+      background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 60%, #DEB887 60%, #8B7355 100%);
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    .swing-label {
+      margin-top: 8px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .swing-label.a { color: #ff6b6b; }
+    .swing-label.b { color: #4ecdc4; }
+
+    .swing-info {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 4px;
+    }
+
+    /* Wave Diagrams */
+    .wave-section {
+      background: rgba(0,0,0,0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .wave-section h3 {
+      color: #ffd700;
+      margin: 0 0 12px 0;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .wave-container {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .wave-box {
+      text-align: center;
+    }
+
+    .wave-box canvas {
+      background: #0d1117;
+      border-radius: 8px;
+    }
+
+    .wave-box canvas.a { border: 1px solid rgba(255,107,107,0.3); }
+    .wave-box canvas.b { border: 1px solid rgba(78,205,196,0.3); }
+
+    .wave-caption {
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .wave-caption.a { color: #ff6b6b; }
+    .wave-caption.b { color: #4ecdc4; }
+
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .legend span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-dot {
+      display: inline-block;
+      width: 12px;
+      height: 3px;
+      border-radius: 2px;
+    }
+
+    /* Controls */
+    .controls {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .slider-group {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .slider-box {
+      flex: 1;
+      min-width: 200px;
+      max-width: 280px;
+    }
+
+    .slider-box.full-width {
+      min-width: 100%;
+      max-width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .slider-box label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .slider-box label.a { color: #ff6b6b; }
+    .slider-box label.b { color: #4ecdc4; }
+    .slider-box label.m { color: #e17055; }
+    .slider-box label.m2 { color: #a29bfe; }
+    .slider-box label.g-label { color: #ffd700; }
+
+    .slider-box input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .slider-box input[type="range"].a { accent-color: #ff6b6b; }
+    .slider-box input[type="range"].b { accent-color: #4ecdc4; }
+    .slider-box input[type="range"].m { accent-color: #e17055; }
+    .slider-box input[type="range"].m2 { accent-color: #a29bfe; }
+    .slider-box input[type="range"].g-slider { accent-color: #ffd700; }
+
+    .slider-range {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .btn {
+      border: none;
+      color: white;
+      padding: 10px 28px;
+      border-radius: 25px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover { transform: scale(1.05); }
+    .btn-play { background: linear-gradient(135deg, #00b894, #00cec9); }
+    .btn-pause { background: linear-gradient(135deg, #fdcb6e, #e17055); }
+    .btn-reset { background: linear-gradient(135deg, #74b9ff, #0984e3); }
+
+    /* Data Cards */
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .data-card {
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .data-card.p1 { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); }
+    .data-card.p2 { background: rgba(78,205,196,0.1); border: 1px solid rgba(78,205,196,0.3); }
+    .data-card.f1 { background: rgba(155,89,182,0.1); border: 1px solid rgba(155,89,182,0.3); }
+    .data-card.f2 { background: rgba(46,204,113,0.1); border: 1px solid rgba(46,204,113,0.3); }
+    .data-card.m1 { background: rgba(225,112,85,0.1); border: 1px solid rgba(225,112,85,0.3); }
+    .data-card.m2 { background: rgba(162,155,254,0.1); border: 1px solid rgba(162,155,254,0.3); }
+
+    .data-label {
+      font-size: 10px;
+      margin-bottom: 4px;
+    }
+
+    .data-card.p1 .data-label { color: #ff6b6b; }
+    .data-card.p2 .data-label { color: #4ecdc4; }
+    .data-card.f1 .data-label { color: #bb8fce; }
+    .data-card.f2 .data-label { color: #2ecc71; }
+    .data-card.m1 .data-label { color: #e17055; }
+    .data-card.m2 .data-label { color: #a29bfe; }
+
+    .data-value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    /* Phase Bar */
+    .phase-section {
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .phase-section h4 {
+      color: #ffd700;
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .phase-track {
+      position: relative;
+      height: 60px;
+      background: #0d1117;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .phase-center {
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: #444;
+    }
+
+    .phase-center-label {
+      position: absolute;
+      left: 50%;
+      top: 5px;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: #666;
+    }
+
+    .phase-marker {
+      position: absolute;
+      height: 18px;
+      border-radius: 9px;
+      transition: left 0.05s linear;
+      width: 20px;
+    }
+
+    .phase-marker.a {
+      top: 12px;
+      background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
+    }
+
+    .phase-marker.b {
+      top: 34px;
+      background: linear-gradient(90deg, #4ecdc4, #6ee7df);
+    }
+
+    .phase-boundary {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: #333;
+    }
+
+    .phase-legend {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎢 Simulator Pendulum Sederhana</h1>
+    <p class="subtitle">Visualisasi gerakan pendulum fisik dan representasi gelombang sinusoidal</p>
+
+    <!-- Swing Visualization -->
+    <div class="swing-area">
+      <div class="swing-box">
+        <canvas id="canvas1" width="200" height="280"></canvas>
+        <div class="swing-label a">Pendulum A</div>
+        <div class="swing-info">Panjang: <span id="valL1">1.0</span> m | Massa: <span id="valM1">1.0</span> kg | Sudut: <span id="valA1">10</span>°</div>
+      </div>
+      <div class="swing-box">
+        <canvas id="canvas2" width="200" height="280"></canvas>
+        <div class="swing-label b">Pendulum B</div>
+        <div class="swing-info">Panjang: <span id="valL2">2.0</span> m | Massa: <span id="valM2">1.0</span> kg | Sudut: <span id="valA2">10</span>°</div>
+      </div>
+    </div>
+
+    <!-- Wave Diagrams -->
+    <div class="wave-section">
+      <h3>📈 Diagram Gelombang (Posisi vs Waktu)</h3>
+      <div class="wave-container">
+        <div class="wave-box">
+          <canvas id="wave1" width="380" height="160" class="a"></canvas>
+          <div class="wave-caption a">Gelombang Pendulum A</div>
+        </div>
+        <div class="wave-box">
+          <canvas id="wave2" width="380" height="160" class="b"></canvas>
+          <div class="wave-caption b">Gelombang Pendulum B</div>
+        </div>
+      </div>
+      <div class="legend">
+        <span><span class="legend-dot" style="background:#ff6b6b;"></span>Posisi Pendulum A</span>
+        <span><span class="legend-dot" style="background:#4ecdc4;"></span>Posisi Pendulum B</span>
+        <span><span class="legend-dot" style="background:#ffd700;"></span>Titik saat ini (●)</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="slider-group">
+        <!-- Gravitasi Global -->
+        <div class="slider-box full-width">
+          <label class="g-label">🌍 Percepatan Gravitasi / g: <span id="valG">9.8</span> m/s²</label>
+          <input type="range" id="sliderG" class="g-slider" min="1.0" max="25.0" step="0.1" value="9.8">
+          <div class="slider-range"><span>1.0 m/s² (Bulan ~1.6)</span><span>9.8 m/s² (Bumi)</span><span>25.0 m/s² (Jupiter ~24.8)</span></div>
+        </div>
+
+        <!-- Pendulum A Controls -->
+        <div class="slider-box">
+          <label class="a">📏 Panjang Tali A (m)</label>
+          <input type="range" id="sliderL1" class="a" min="0.3" max="2.5" step="0.1" value="1.0">
+          <div class="slider-range"><span>0.3m</span><span>2.5m</span></div>
+        </div>
+        <div class="slider-box">
+          <label class="m">⚖️ Massa A (kg)</label>
+          <input type="range" id="sliderM1" class="m" min="0.1" max="5.0" step="0.1" value="1.0">
+          <div class="slider-range"><span>0.1kg</span><span>5.0kg</span></div>
+        </div>
+        <div class="slider-box">
+          <label class="a">📐 Sudut Simpangan A (°)</label>
+          <input type="range" id="sliderA1" class="a" min="1" max="15" step="1" value="10">
+          <div class="slider-range"><span>1°</span><span>15°</span></div>
+        </div>
+
+        <!-- Pendulum B Controls -->
+        <div class="slider-box">
+          <label class="b">📏 Panjang Tali B (m)</label>
+          <input type="range" id="sliderL2" class="b" min="0.3" max="2.5" step="0.1" value="2.0">
+          <div class="slider-range"><span>0.3m</span><span>2.5m</span></div>
+        </div>
+        <div class="slider-box">
+          <label class="m2">⚖️ Massa B (kg)</label>
+          <input type="range" id="sliderM2" class="m2" min="0.1" max="5.0" step="0.1" value="1.0">
+          <div class="slider-range"><span>0.1kg</span><span>5.0kg</span></div>
+        </div>
+        <div class="slider-box">
+          <label class="b">📐 Sudut Simpangan B (°)</label>
+          <input type="range" id="sliderA2" class="b" min="1" max="15" step="1" value="10">
+          <div class="slider-range"><span>1°</span><span>15°</span></div>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-play" id="btnPlay">▶ Mulai</button>
+        <button class="btn btn-pause" id="btnPause">⏸ Jeda</button>
+        <button class="btn btn-reset" id="btnReset">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- Data Display -->
+    <div class="data-grid">
+      <div class="data-card p1">
+        <div class="data-label">Periode A (T₁)</div>
+        <div class="data-value" id="period1">2.01 s</div>
+      </div>
+      <div class="data-card m1">
+        <div class="data-label">Massa A (m₁)</div>
+        <div class="data-value" id="mass1">1.00 kg</div>
+      </div>
+      <div class="data-card f1">
+        <div class="data-label">Frekuensi A (f₁)</div>
+        <div class="data-value" id="freq1">0.50 Hz</div>
+      </div>
+      <div class="data-card p2">
+        <div class="data-label">Periode B (T₂)</div>
+        <div class="data-value" id="period2">2.84 s</div>
+      </div>
+      <div class="data-card m2">
+        <div class="data-label">Massa B (m₂)</div>
+        <div class="data-value" id="mass2">1.00 kg</div>
+      </div>
+      <div class="data-card f2">
+        <div class="data-label">Frekuensi B (f₂)</div>
+        <div class="data-value" id="freq2">0.35 Hz</div>
+      </div>
+    </div>
+
+    <!-- Phase Comparison -->
+    <div class="phase-section">
+      <h4>🔄 Perbandingan Fase (Posisi Horizontal Pendulum)</h4>
+      <div class="phase-track">
+        <div class="phase-center"></div>
+        <div class="phase-center-label">0 (tengah)</div>
+        <div class="phase-marker a" id="phaseBarA"></div>
+        <div class="phase-marker b" id="phaseBarB"></div>
+        <div class="phase-boundary" style="left:10%;"></div>
+        <div class="phase-boundary" style="right:10%;"></div>
+      </div>
+      <div class="phase-legend">
+        <span>← Kiri (min)</span>
+        <span style="color:#ff6b6b;">● Pendulum A</span>
+        <span style="color:#4ecdc4;">● Pendulum B</span>
+        <span>Kanan (max) →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       JAVASCRIPT
+       ============================================ -->
+  <script>
+    (function() {
+      let running = false;
+      let t = 0;
+      let animId = null;
+      const history1 = [];
+      const history2 = [];
+      const maxHistory = 300;
+
+      // DOM Elements
+      const sliderG = document.getElementById('sliderG');
+      const sliderL1 = document.getElementById('sliderL1');
+      const sliderL2 = document.getElementById('sliderL2');
+      const sliderM1 = document.getElementById('sliderM1');
+      const sliderM2 = document.getElementById('sliderM2');
+      const sliderA1 = document.getElementById('sliderA1');
+      const sliderA2 = document.getElementById('sliderA2');
+
+      const valG = document.getElementById('valG');
+      const valL1 = document.getElementById('valL1');
+      const valL2 = document.getElementById('valL2');
+      const valM1 = document.getElementById('valM1');
+      const valM2 = document.getElementById('valM2');
+      const valA1 = document.getElementById('valA1');
+      const valA2 = document.getElementById('valA2');
+
+      const period1El = document.getElementById('period1');
+      const period2El = document.getElementById('period2');
+      const freq1El = document.getElementById('freq1');
+      const freq2El = document.getElementById('freq2');
+      const mass1El = document.getElementById('mass1');
+      const mass2El = document.getElementById('mass2');
+      const phaseBarA = document.getElementById('phaseBarA');
+      const phaseBarB = document.getElementById('phaseBarB');
+
+      const canvas1 = document.getElementById('canvas1');
+      const canvas2 = document.getElementById('canvas2');
+      const wave1 = document.getElementById('wave1');
+      const wave2 = document.getElementById('wave2');
+      const ctx1 = canvas1.getContext('2d');
+      const ctx2 = canvas2.getContext('2d');
+      const wctx1 = wave1.getContext('2d');
+      const wctx2 = wave2.getContext('2d');
+
+      // Physics Functions
+      function calcPeriod(L, g) {
+        return 2 * Math.PI * Math.sqrt(L / g);
+      }
+
+      function calcFreq(L, g) {
+        return 1 / calcPeriod(L, g);
+      }
+
+      // Update Data Display
+      function updateData() {
+        const gVal = parseFloat(sliderG.value);
+        const L1 = parseFloat(sliderL1.value);
+        const L2 = parseFloat(sliderL2.value);
+        const M1 = parseFloat(sliderM1.value);
+        const M2 = parseFloat(sliderM2.value);
+        const deg1 = parseFloat(sliderA1.value);
+        const deg2 = parseFloat(sliderA2.value);
+
+        const T1 = calcPeriod(L1, gVal);
+        const T2 = calcPeriod(L2, gVal);
+        const f1 = calcFreq(L1, gVal);
+        const f2 = calcFreq(L2, gVal);
+
+        valG.textContent = gVal.toFixed(1);
+        valL1.textContent = L1.toFixed(1);
+        valL2.textContent = L2.toFixed(1);
+        valM1.textContent = M1.toFixed(1);
+        valM2.textContent = M2.toFixed(1);
+        valA1.textContent = deg1;
+        valA2.textContent = deg2;
+
+        period1El.textContent = T1.toFixed(2) + ' s';
+        period2El.textContent = T2.toFixed(2) + ' s';
+        freq1El.textContent = f1.toFixed(2) + ' Hz';
+        freq2El.textContent = f2.toFixed(2) + ' Hz';
+        mass1El.textContent = M1.toFixed(2) + ' kg';
+        mass2El.textContent = M2.toFixed(2) + ' kg';
+      }
+
+      // Draw Swing with mass & angle variables
+      function drawSwing(ctx, L, M, color, angleAmpRad, time, gVal) {
+        const W = ctx.canvas.width;
+        const H = ctx.canvas.height;
+        const originX = W / 2;
+        const originY = 30;
+        const maxLen = 180;
+        const scale = maxLen / 2.5;
+        const len = L * scale;
+
+        const seatWidth = 18 + M * 4;
+        const seatHeight = 6 + M * 1.5;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Frame
+        ctx.fillStyle = '#c0392b';
+        ctx.fillRect(20, 20, W - 40, 12);
+
+        // Poles
+        ctx.fillStyle = '#2980b9';
+        ctx.fillRect(25, 20, 8, H - 20);
+        ctx.fillRect(W - 33, 20, 8, H - 20);
+
+        // Pendulum position
+        const omega = Math.sqrt(gVal / L);
+        const angle = angleAmpRad * Math.cos(omega * time);
+        const bobX = originX + len * Math.sin(angle);
+        const bobY = originY + len * Math.cos(angle);
+
+        // Trail
+        for (let i = 0; i < 12; i++) {
+          const trailT = time - i * 0.06;
+          const trailAngle = angleAmpRad * Math.cos(omega * trailT);
+          const tx = originX + len * Math.sin(trailAngle);
+          const ty = originY + len * Math.cos(trailAngle);
+          ctx.beginPath();
+          ctx.arc(tx, ty, 3.5 - i * 0.2, 0, Math.PI * 2);
+          ctx.fillStyle = color.replace('1)', Math.max(0, (12 - i) / 12 * 0.35).toFixed(2) + ')');
+          ctx.fill();
+        }
+
+        // String
+        ctx.beginPath();
+        ctx.moveTo(originX, originY);
+        ctx.lineTo(bobX, bobY);
+        ctx.strokeStyle = '#555';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Chain links
+        for (let i = 1; i < 8; i++) {
+          const cx = originX + (bobX - originX) * (i / 8);
+          const cy = originY + (bobY - originY) * (i / 8);
+          ctx.beginPath();
+          ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+          ctx.fillStyle = '#888';
+          ctx.fill();
+        }
+
+        // Seat
+        ctx.beginPath();
+        ctx.ellipse(bobX, bobY + 8, seatWidth, seatHeight, 0, 0, Math.PI * 2);
+        ctx.fillStyle = '#2c3e50';
+        ctx.fill();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Mass indicator
+        ctx.beginPath();
+        ctx.arc(bobX, bobY + 8, seatHeight * 0.6, 0, Math.PI * 2);
+        ctx.fillStyle = color.replace('1)', '0.4)');
+        ctx.fill();
+
+        // Mass label
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(M.toFixed(1) + 'kg', bobX, bobY + 11);
+
+        // Highlight
+        ctx.beginPath();
+        ctx.arc(bobX - seatWidth * 0.3, bobY + 5, 3, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.3)';
+        ctx.fill();
+      }
+
+      // Draw Wave Diagram
+      function drawWaveDiagram(ctx, L, color, history, currentY, gVal) {
+        const W = ctx.canvas.width;
+        const H = ctx.canvas.height;
+        const T = calcPeriod(L, gVal);
+        const midY = H / 2;
+        const amp = 50;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Grid
+        ctx.strokeStyle = '#1a2332';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < W; i += 40) {
+          ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
+        }
+        for (let i = 0; i < H; i += 20) {
+          ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke();
+        }
+
+        // Axes
+        ctx.strokeStyle = '#444';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(W, midY); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(30, 0); ctx.lineTo(30, H); ctx.stroke();
+
+        // Labels
+        ctx.fillStyle = '#666';
+        ctx.font = '10px sans-serif';
+        ctx.fillText('t →', W - 25, midY - 5);
+        ctx.fillText('y', 35, 12);
+        ctx.fillText('+' + amp, 5, midY - amp + 4);
+        ctx.fillText('-' + amp, 5, midY + amp + 4);
+
+        // Amplitude reference lines
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = '#333';
+        ctx.beginPath(); ctx.moveTo(30, midY - amp); ctx.lineTo(W, midY - amp); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(30, midY + amp); ctx.lineTo(W, midY + amp); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Wave line
+        if (history.length > 1) {
+          ctx.beginPath();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = 2.5;
+          const startIdx = Math.max(0, history.length - W + 30);
+          for (let i = startIdx; i < history.length; i++) {
+            const x = 30 + (i - startIdx);
+            const y = midY - history[i] * amp;
+            if (i === startIdx) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+
+          // Glow
+          ctx.beginPath();
+          ctx.strokeStyle = color.replace('1)', '0.15)');
+          ctx.lineWidth = 8;
+          for (let i = startIdx; i < history.length; i++) {
+            const x = 30 + (i - startIdx);
+            const y = midY - history[i] * amp;
+            if (i === startIdx) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+        }
+
+        // Current point
+        const lastX = 30 + Math.min(history.length, W - 30) - 1;
+        const lastY = midY - currentY * amp;
+        ctx.beginPath();
+        ctx.arc(lastX, lastY, 6, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffd700';
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Period markers
+        const pixelsPerSecond = 40;
+        ctx.fillStyle = color.replace('1)', '0.6)');
+        ctx.font = '10px sans-serif';
+        for (let n = 1; n * T * pixelsPerSecond < W - 30; n++) {
+          const mx = 30 + n * T * pixelsPerSecond;
+          ctx.beginPath(); ctx.moveTo(mx, midY - 5); ctx.lineTo(mx, midY + 5);
+          ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.stroke();
+          ctx.fillText('T=' + (n * T).toFixed(1) + 's', mx - 20, midY + 18);
+        }
+      }
+
+      // Update Phase Bars
+      function updatePhaseBars(y1, y2) {
+        const maxOffset = 40;
+        const offset1 = y1 * maxOffset;
+        const offset2 = y2 * maxOffset;
+        phaseBarA.style.left = (50 + offset1) + '%';
+        phaseBarB.style.left = (50 + offset2) + '%';
+      }
+
+      // Animation Loop
+      function animate() {
+        if (!running) return;
+        t += 0.02;
+        const gVal = parseFloat(sliderG.value);
+        const L1 = parseFloat(sliderL1.value);
+        const L2 = parseFloat(sliderL2.value);
+        const M1 = parseFloat(sliderM1.value);
+        const M2 = parseFloat(sliderM2.value);
+        
+        // Konversi sudut derajat ke radian
+        const angleAmp1 = parseFloat(sliderA1.value) * (Math.PI / 180);
+        const angleAmp2 = parseFloat(sliderA2.value) * (Math.PI / 180);
+
+        const omega1 = Math.sqrt(gVal / L1);
+        const omega2 = Math.sqrt(gVal / L2);
+
+        // Skala gelombang relatif terhadap sudut referensi maksimum (15 deg)
+        const refAngle = 15 * (Math.PI / 180);
+        const y1 = Math.sin(omega1 * t) * (angleAmp1 / refAngle);
+        const y2 = Math.sin(omega2 * t) * (angleAmp2 / refAngle);
+
+        history1.push(y1);
+        history2.push(y2);
+        if (history1.length > maxHistory) history1.shift();
+        if (history2.length > maxHistory) history2.shift();
+
+        drawSwing(ctx1, L1, M1, 'rgba(255, 107, 107, 1)', angleAmp1, t, gVal);
+        drawSwing(ctx2, L2, M2, 'rgba(78, 205, 196, 1)', angleAmp2, t, gVal);
+        drawWaveDiagram(wctx1, L1, 'rgba(255, 107, 107, 1)', history1, y1, gVal);
+        drawWaveDiagram(wctx2, L2, 'rgba(78, 205, 196, 1)', history2, y2, gVal);
+        updatePhaseBars(y1, y2);
+
+        animId = requestAnimationFrame(animate);
+      }
+
+      // Event Listeners
+      sliderG.addEventListener('input', updateData);
+      sliderL1.addEventListener('input', updateData);
+      sliderL2.addEventListener('input', updateData);
+      sliderM1.addEventListener('input', updateData);
+      sliderM2.addEventListener('input', updateData);
+      sliderA1.addEventListener('input', updateData);
+      sliderA2.addEventListener('input', updateData);
+
+      document.getElementById('btnPlay').addEventListener('click', function() {
+        if (!running) {
+          running = true;
+          animate();
+        }
+      });
+
+      document.getElementById('btnPause').addEventListener('click', function() {
+        running = false;
+        if (animId) cancelAnimationFrame(animId);
+      });
+
+      document.getElementById('btnReset').addEventListener('click', function() {
+        running = false;
+        if (animId) cancelAnimationFrame(animId);
+        t = 0;
+        history1.length = 0;
+        history2.length = 0;
+        sliderG.value = 9.8;
+        sliderL1.value = 1.0;
+        sliderL2.value = 2.0;
+        sliderM1.value = 1.0;
+        sliderM2.value = 1.0;
+        sliderA1.value = 10;
+        sliderA2.value = 10;
+        updateData();
+        
+        const gVal = 9.8;
+        const rad1 = 10 * (Math.PI / 180);
+        const rad2 = 10 * (Math.PI / 180);
+        
+        drawSwing(ctx1, 1.0, 1.0, 'rgba(255, 107, 107, 1)', rad1, 0, gVal);
+        drawSwing(ctx2, 2.0, 1.0, 'rgba(78, 205, 196, 1)', rad2, 0, gVal);
+        drawWaveDiagram(wctx1, 1.0, 'rgba(255, 107, 107, 1)', [], 0, gVal);
+        drawWaveDiagram(wctx2, 2.0, 'rgba(78, 205, 196, 1)', [], 0, gVal);
+        updatePhaseBars(0, 0);
+      });
+
+      // Initialize
+      updateData();
+      const initG = 9.8;
+      const initRad1 = 10 * (Math.PI / 180);
+      const initRad2 = 10 * (Math.PI / 180);
+      drawSwing(ctx1, 1.0, 1.0, 'rgba(255, 107, 107, 1)', initRad1, 0, initG);
+      drawSwing(ctx2, 2.0, 1.0, 'rgba(78, 205, 196, 1)', initRad2, 0, initG);
+      drawWaveDiagram(wctx1, 1.0, 'rgba(255, 107, 107, 1)', [], 0, initG);
+      drawWaveDiagram(wctx2, 2.0, 'rgba(78, 205, 196, 1)', [], 0, initG);
+    })();
+  </script>
+</body>
+</html>
